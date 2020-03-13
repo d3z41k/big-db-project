@@ -44,10 +44,15 @@ class HomeController extends Controller
 //            $totalProfit += $trade->profit;
 //        }
 
+        $client = Client::factory('http://localhost:8081/rpc', ['headers' => ['X-Auth' => '1234567890qwertyuiop']]);
 
-        $client = Client::factory('http://localhost:8082/rpc');
+//        $body = $client->send($client->request(123, 'HelloService.SayHello', [['name' => 'Tom', 'age' => 27]]))->getBody();
 
-        $body = $client->send($client->request(123, 'HelloService.SayHello', [['name' => 'Tom', 'age' => 27]]))->getBody();
+        $body = $client->send($client->request(123, 'TradesService.GetCountTrades', [[
+            'uids' => [42, 13, 20, 11, 21, 30],
+            'symbol' => 'GBPJPY',
+            'dateFrom' => '2019-05-22 00:07:27',
+        ]]))->getBody();
 
         while (!$body->eof()) {
             $response = $body->read(1024);
