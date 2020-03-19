@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\Trade;
 use Graze\GuzzleHttp\JsonRpc\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use phpDocumentor\Reflection\Types\Integer;
 
 class HomeController extends Controller
 {
@@ -61,5 +63,19 @@ class HomeController extends Controller
         $data = json_decode($response);
 
         return view('trades', ['totalProfit' => $data->result]);
+    }
+
+    /**
+     * @param int $tgUid
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function bindTG(int $tgUid)
+    {
+        $user = Auth::user();
+
+        $user->tg_uid = $tgUid;
+        $user->save();
+
+        return redirect()->route('home');
     }
 }
