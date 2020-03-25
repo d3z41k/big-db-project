@@ -3,11 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
-use App\Trade;
 use Graze\GuzzleHttp\JsonRpc\Client;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use phpDocumentor\Reflection\Types\Integer;
 
 class HomeController extends Controller
 {
@@ -77,5 +73,16 @@ class HomeController extends Controller
         $user->save();
 
         return redirect()->route('home');
+    }
+
+    /**
+     * @param int $tgUid
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function getBalance()
+    {
+        $user = Auth::user();
+
+        return $user->balance;
     }
 }

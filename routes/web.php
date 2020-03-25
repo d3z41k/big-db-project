@@ -20,3 +20,4 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/trades', 'HomeController@Trades')->name('trades');
 Route::get('/telegram/bind/{tg_uid}', 'HomeController@bindTG')->name('bind-tg');
+Route::get('/balance', 'HomeController@getBalance')->name('balance');
