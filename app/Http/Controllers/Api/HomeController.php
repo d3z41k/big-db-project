@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Trade;
 use DB;
 use App\Http\Controllers\Controller;
 use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -49,10 +51,6 @@ class HomeController extends Controller
      */
     public function getBalance(Request $request)
     {
-        if (!isset($request['token']) || $request['token'] !== config('app.api_token')) {
-            abort(403);
-        }
-
         if (!isset($request['uid']) || $request['uid'] == '') {
             abort(404);
         }
@@ -63,6 +61,40 @@ class HomeController extends Controller
             abort(404);
         }
 
-        return $user->balance;
+        return json_encode(['err' => '', 'message' => '', 'balance' => (string) $user->balance]);
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    public function openTrade(Request $request)
+    {
+        if (!isset($request['uid']) || $request['uid'] == '') {
+            abort(404);
+        }
+
+        $user = DB::table('users')->find((int) $request['uid']);
+
+        if (!$user) {
+            abort(404);
+        }
+
+        try {
+            Trade::insert([
+                'ticket' => (string) Str::uuid(),
+                'uid' => (int) $request['uid'],
+                'amount' => (float) $request['amount'],
+                'percent_profit' => (int) $request['payout'],
+                'command' => (int) $request['command'],
+                'symbol' => $request['symbol'],
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            return  json_encode(['err' => 'true', 'message' => $e->getMessage()]);
+        }
+
+        return json_encode(['err' => '', 'message' => '']);
     }
 }

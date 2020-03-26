@@ -6,8 +6,13 @@ use Illuminate\Http\Request;
 //    return $request->user();
 //});
 
-Route::group(['as' => 'api.', 'namespace' => 'Api'],
+Route::group([
+    'as' => 'api.',
+    'namespace' => 'Api',
+    'middleware' => 'api.auth'
+],
     function () {
-        Route::get('/balance', 'HomeController@getBalance');
+        Route::get('/balance', 'HomeController@getBalance')->name('balance');
+        Route::post('/open-trade', 'HomeController@openTrade')->name('open-trade');
     }
 );
