@@ -15,7 +15,10 @@ class ApiAuth
      */
     public function handle($request, Closure $next)
     {
-        if (!isset($request['token']) || $request['token'] !== config('app.api_token')) {
+        if (!in_array($request->ip(), config('app.api_allow_ips')) ||
+            !isset($request['token']) ||
+            $request['token'] !== config('app.api_token')
+        ) {
             abort(403);
         }
 
