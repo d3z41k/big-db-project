@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">The Big DB project</div>
+                <div class="card-header">TG Bind</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -13,15 +13,11 @@
                             {{ session('status') }}
                         </div>
                     @endif
-
-                    <div class="content">
-                        <div class="links">
-                            <a href="{{ route('trades') }}">Trades</a>
-                            <a href="{{ route('balance') }}">Balance</a>
-                            <a href="{{ route('tg-bind') }}">Bind</a>
-                        </div>
-                    </div>
-
+                        {!! Form::open(['url' => route('tg-bind')]) !!}
+                            {!! Form::label('tid', 'Telegram ID') !!}
+                            {!! Form::text('tid', $params['tid'] ?? '') !!}
+                            {!!  Form::submit('Bind') !!}
+                        {!! Form::close() !!}
                 </div>
             </div>
         </div>

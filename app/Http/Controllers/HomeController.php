@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use Graze\GuzzleHttp\JsonRpc\Client;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -62,14 +63,29 @@ class HomeController extends Controller
     }
 
     /**
-     * @param int $tgUid
+     * @param Request $request
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function bindTG(int $tgUid)
+    public function bindView(Request $request)
     {
         $user = Auth::user();
 
-        $user->tg_uid = $tgUid;
+        return view('bind', ['params' => $request->all()]);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function bind(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(404);
+        }
+
+        $user->tid = (int) $request['tid'];
         $user->save();
 
         return redirect()->route('home');
