@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Auth;
 use Graze\GuzzleHttp\JsonRpc\Client;
+use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class HomeController extends Controller
 {
@@ -75,7 +77,7 @@ class HomeController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return string
      */
     public function bind(Request $request)
     {
@@ -85,10 +87,35 @@ class HomeController extends Controller
             abort(404);
         }
 
-        $user->tid = (int) $request['tid'];
-        $user->save();
+        $client = new GuzzleClient();
 
-        return redirect()->route('home');
+        $response = $client->request('POST', 'http://localhost:8000/bind', [
+            'json' => [
+                'token' => config('app.api_token'),
+                'tid' => (string) $request['tid'],
+                'pocket_uid' => (string) $user->id
+            ]
+        ]);
+
+        if ($response->getStatusCode() == Response::HTTP_OK) {
+            $body = $response->getBody();
+
+            while (!$body->eof()) {
+                $data = $body->read(1024);
+            }
+
+            $jsonResponse = json_decode($data, true);
+
+            if ($jsonResponse['status'] == true) {
+                $user->tid = (int) $request['tid'];
+                $user->save();
+
+                return 'Success!';
+            }
+
+        }
+
+        return $jsonResponse['message'];
     }
 
     /**

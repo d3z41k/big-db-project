@@ -15,7 +15,7 @@
                     @endif
                         {!! Form::open(['url' => route('tg-bind')]) !!}
                             {!! Form::label('tid', 'Telegram ID') !!}
-                            {!! Form::text('tid', $params['tid'] ?? '') !!}
+                            {!! Form::text('tid', $params['tid'] ?? Auth::user()->tid) !!}
                             {!!  Form::submit('Bind') !!}
                         {!! Form::close() !!}
                 </div>
