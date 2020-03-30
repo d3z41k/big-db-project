@@ -87,35 +87,59 @@ class HomeController extends Controller
             abort(404);
         }
 
-        $client = new GuzzleClient();
-
-        $response = $client->request('POST', 'http://localhost:8000/bind', [
-            'json' => [
-                'token' => config('app.api_token'),
-                'tid' => (string) $request['tid'],
-                'pocket_uid' => (string) $user->id
-            ]
-        ]);
-
-        if ($response->getStatusCode() == Response::HTTP_OK) {
-            $body = $response->getBody();
-
-            while (!$body->eof()) {
-                $data = $body->read(1024);
-            }
-
-            $jsonResponse = json_decode($data, true);
-
-            if ($jsonResponse['status'] == true) {
-                $user->tid = (int) $request['tid'];
-                $user->save();
-
-                return 'Success!';
-            }
-
+        if ($user->tid == $request['tid']) {
+            return 'This ID already binding';
         }
 
-        return $jsonResponse['message'];
+        $client = new GuzzleClient();
+
+        try {
+            $response = $client->request('POST', 'http://localhost:8000/bind', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('app.api_token'),
+                ],
+                'json' => [
+                    'token' => config('app.api_token'),
+                    'tid' => (string) $request['tid'],
+                    'pocket_uid' => (string) $user->id
+                ]
+            ]);
+        } catch(\Exception $e) {
+            switch ($e->getCode()) {
+                case Response::HTTP_FORBIDDEN:
+                    return 'Access denied';
+                    break;
+                default:
+                    return 'Something went wrong';
+                    break;
+            }
+        }
+
+        switch ($response->getStatusCode()) {
+            case Response::HTTP_OK:
+                $body = $response->getBody();
+
+                while (!$body->eof()) {
+                    $data = $body->read(1024);
+                }
+
+                $jsonResponse = json_decode($data, true);
+
+                if ($jsonResponse['status'] == true) {
+                    $user->tid = (int) $request['tid'];
+                    $user->save();
+
+                    return 'Success!';
+                }
+                return $jsonResponse['message'];
+                break;
+            case Response::HTTP_FORBIDDEN:
+                return 'Access denied';
+                break;
+            default:
+                return 'Something went wrong';
+                break;
+        }
     }
 
     /**
